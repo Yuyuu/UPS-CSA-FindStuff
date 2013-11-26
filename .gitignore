@@ -1,0 +1,7 @@
+*/bin
+*/gen
+*.class
+.classpath
+.project
+org.eclipse.jdt.core.prefs
+project.properties

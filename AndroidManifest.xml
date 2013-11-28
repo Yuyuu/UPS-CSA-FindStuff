@@ -22,6 +22,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <activity
+            android:name="ups.csa.findstuff.RadarActivity"
+            android:label="@string/app_name"
+            android:parentActivityName="ups.csa.findstuff.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ups.csa.findstuff.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

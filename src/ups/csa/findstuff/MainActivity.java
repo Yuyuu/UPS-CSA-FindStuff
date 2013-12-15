@@ -3,7 +3,6 @@ package ups.csa.findstuff;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -49,7 +48,7 @@ public class MainActivity extends Activity {
 					double longitude = location.getLongitude();
 					double latitude = location.getLatitude();		
 					
-					Intent intent = new Intent("com.google.android.radar.SHOW_RADAR"); 
+					Intent intent = new Intent(RADAR_APP + "." + RADAR_LAUNCH); 
 			        intent.putExtra("latitude", (float) (latitude + 5)); 
 			        intent.putExtra("longitude", (float) (longitude + 5)); 
 			        startActivity(intent);

@@ -1,7 +1,10 @@
 package ups.csa.findstuff;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -33,10 +36,16 @@ public class MainActivity extends Activity {
 		button0.setOnClickListener(new View.OnClickListener() {
 
 			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(MainActivity.this, RadarActivity.class);
-				intent.putExtra("CHOSE", "portefeuille");
-				MainActivity.this.startActivity(intent);
+			public void onClick(View v) {			
+				LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+				Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+				double longitude = location.getLongitude();
+				double latitude = location.getLatitude();		
+				
+				Intent intent = new Intent("com.google.android.radar.SHOW_RADAR"); 
+		        intent.putExtra("latitude", (float) latitude); 
+		        intent.putExtra("longitude", (float) longitude); 
+		        startActivity(intent);
 			}
 		});
 

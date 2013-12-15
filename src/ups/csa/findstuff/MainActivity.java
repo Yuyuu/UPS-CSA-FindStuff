@@ -10,22 +10,14 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
 	private static final String RADAR_APP = "com.google.android.radar";
 	private static final String RADAR_LAUNCH = "SHOW_RADAR";
 	private static final String ANDROID_MARKET = "market://details?id=";
-
-	// On déclare toutes les variables dont on aura besoin
-
-	Button button0;
-	Button button1;
-	Button button2;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -34,52 +26,48 @@ public class MainActivity extends Activity {
 
 		setContentView(R.layout.activity_main);
 
-		// On récupère tous les éléments de notre interface graphique grâce aux
-		// ID
-		button0 = (Button) findViewById(R.id.button0);
-		button1 = (Button) findViewById(R.id.button1);
-		button2 = (Button) findViewById(R.id.button2);
+		setUpButton((Button) findViewById(R.id.wallet), false);
+		setUpButton((Button) findViewById(R.id.keys), true);
 
-		button0.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// Checks dependencies.
-				if (isAppInstalled(RADAR_APP)) {
-					LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-					Location location = lm
-							.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-					double longitude = location.getLongitude();
-					double latitude = location.getLatitude();
-
-					Intent intent = new Intent(RADAR_APP + "." + RADAR_LAUNCH);
-					intent.putExtra("latitude", (float) (latitude + 5));
-					intent.putExtra("longitude", (float) (longitude + 5));
-					startActivity(intent);
-				} else {
-					showAppRequestAlert(RADAR_APP);
-				}
-			}
-		});
-
-		button1.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(MainActivity.this,
-						RadarActivity.class);
-				intent.putExtra("CHOSE", "clé");
-				MainActivity.this.startActivity(intent);
-			}
-		});
-
-		button2.setOnClickListener(new View.OnClickListener() {
+		((Button) findViewById(R.id.quit)).setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				MainActivity.this.finish();
 				MainActivity.this.onDestroy();
 			}
 		});
 
+	}
+	
+	private void setUpButton(Button button, final boolean implemented) {
+		button.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (implemented) {
+					// Checks dependencies.
+					if (isAppInstalled(RADAR_APP)) {
+						// Custom code.
+						LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+						Location location = lm
+								.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+						double longitude = location.getLongitude();
+						double latitude = location.getLatitude();
+
+						// Displays radar application.
+						Intent intent = new Intent(RADAR_APP + "." + RADAR_LAUNCH);
+						intent.putExtra("latitude", (float) (latitude + 5));
+						intent.putExtra("longitude", (float) (longitude + 5));
+						startActivity(intent);
+					} else {
+						showAppRequestAlert(RADAR_APP);
+					}
+				} else {
+					Intent intent = new Intent(MainActivity.this, RadarActivity.class);
+					intent.putExtra("CHOSE", "Not implemented yet.");
+					MainActivity.this.startActivity(intent);
+				}
+			}
+		});
 	}
 
 	private boolean isAppInstalled(String appPackageName) {

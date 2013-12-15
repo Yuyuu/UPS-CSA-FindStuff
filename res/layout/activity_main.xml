@@ -4,24 +4,24 @@
     android:orientation="vertical" >
 
     <Button
-        android:id="@+id/button0"
+        android:id="@+id/wallet"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Portefeuille" />
+        android:text="Wallet" />
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/keys"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Clés" />
+        android:text="Keys" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/quit"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Quitter" />
+        android:text="Quit" />
 
 </LinearLayout><!-- </RelativeLayout> -->

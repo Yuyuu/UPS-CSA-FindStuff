@@ -12,12 +12,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import fr.dgac.ivy.Ivy;
+import fr.dgac.ivy.IvyException;
 
 public class MainActivity extends Activity {
 
 	private static final String RADAR_APP = "com.google.android.radar";
 	private static final String RADAR_LAUNCH = "SHOW_RADAR";
 	private static final String ANDROID_MARKET = "market://details?id=";
+	private static final String LOCAL_NETWORK = "192.168.1";
+	
+	private Ivy bus;
+	private boolean ivyStarted;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -25,19 +31,40 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_main);
+		
+		startIvy(LOCAL_NETWORK, Ivy.DEFAULT_PORT);
 
 		setUpButton((Button) findViewById(R.id.wallet), false);
 		setUpButton((Button) findViewById(R.id.keys), true);
 
-		((Button) findViewById(R.id.quit)).setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				MainActivity.this.finish();
-				MainActivity.this.onDestroy();
-			}
-		});
+		((Button) findViewById(R.id.quit))
+				.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						leaveIvy();
+						finish();
+						onDestroy();
+					}
+				});
 
 	}
+
+	private void startIvy(String address, int port) {
+		try {
+			// Starts the bus with a "Ready" message.
+			bus = new Ivy("Transmitter", "Ready", null);
+			bus.start(address + ":" + port);
+			ivyStarted = true;
+		} catch (IvyException e) {
+			ivyStarted = false;
+		}
+	}
 	
+	private void leaveIvy() {
+		if (ivyStarted) {
+			bus.stop();
+		}
+	}
+
 	private void setUpButton(Button button, final boolean implemented) {
 		button.setOnClickListener(new View.OnClickListener() {
 
@@ -54,7 +81,8 @@ public class MainActivity extends Activity {
 						double latitude = location.getLatitude();
 
 						// Displays radar application.
-						Intent intent = new Intent(RADAR_APP + "." + RADAR_LAUNCH);
+						Intent intent = new Intent(RADAR_APP + "."
+								+ RADAR_LAUNCH);
 						intent.putExtra("latitude", (float) (latitude + 5));
 						intent.putExtra("longitude", (float) (longitude + 5));
 						startActivity(intent);
@@ -62,7 +90,8 @@ public class MainActivity extends Activity {
 						showAppRequestAlert(RADAR_APP);
 					}
 				} else {
-					Intent intent = new Intent(MainActivity.this, RadarActivity.class);
+					Intent intent = new Intent(MainActivity.this,
+							RadarActivity.class);
 					intent.putExtra("CHOSE", "Not implemented yet.");
 					MainActivity.this.startActivity(intent);
 				}
@@ -106,7 +135,7 @@ public class MainActivity extends Activity {
 
 		// Makes second button.
 		builder.setNegativeButton("Cancel", null);
-		
+
 		// Displays the alert.
 		builder.show();
 	}

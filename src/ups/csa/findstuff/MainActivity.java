@@ -2,18 +2,17 @@ package ups.csa.findstuff;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import fr.dgac.ivy.Ivy;
+import fr.dgac.ivy.IvyClient;
 import fr.dgac.ivy.IvyException;
+import fr.dgac.ivy.IvyMessageListener;
 
 public class MainActivity extends Activity {
 
@@ -21,7 +20,7 @@ public class MainActivity extends Activity {
 	private static final String RADAR_LAUNCH = "SHOW_RADAR";
 	private static final String ANDROID_MARKET = "market://details?id=";
 	private static final String LOCAL_NETWORK = "192.168.1";
-	
+
 	private Ivy bus;
 	private boolean ivyStarted;
 
@@ -31,7 +30,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_main);
-		
+
 		startIvy(LOCAL_NETWORK, Ivy.DEFAULT_PORT);
 
 		setUpButton((Button) findViewById(R.id.wallet), false);
@@ -58,14 +57,59 @@ public class MainActivity extends Activity {
 			ivyStarted = false;
 		}
 	}
-	
+
 	private void leaveIvy() {
 		if (ivyStarted) {
 			bus.stop();
 		}
 	}
 
-	private void setUpButton(Button button, final boolean implemented) {
+	private void askForCoords(Button button) {
+		if (ivyStarted) {
+			// Gets the item to find and checks if it is connected.
+			final String itemToFind = button.getText().toString();
+			if (!bus.getIvyClientsByName(itemToFind).isEmpty()) {
+				try {
+					bus.bindMsg("^Coords (\\d+\\.\\d+) (\\d+\\.\\d+)$",
+							new IvyMessageListener() {
+	
+								@Override
+								public void receive(IvyClient client, String[] args) {
+									// Checks if it is the right item.
+									if (client.getApplicationName().equals(
+											itemToFind)) {
+										// Unsubscribes to the bus.
+										bus.unBindMsg("^Coords (\\d+\\.\\d+) (\\d+\\.\\d+)$");
+	
+										// Gets the item coordinates.
+										double latitude = Double
+												.parseDouble(args[0]);
+										double longitude = Double
+												.parseDouble(args[1]);
+	
+										// Displays radar application.
+										Intent intent = new Intent(RADAR_APP + "."
+												+ RADAR_LAUNCH);
+										intent.putExtra("latitude",
+												(float) latitude);
+										intent.putExtra("longitude",
+												(float) longitude);
+										startActivity(intent);
+									}
+								}
+	
+							});
+					bus.sendMsg("Search " + itemToFind);
+				} catch (IvyException e) { }
+			} else {
+				showIvyAlert("The item is not connected to the network right now.\n\nYou must find it yourself, sorry!");
+			}
+		} else {
+			showIvyAlert("You are not connected to the network right now.\n\nPlease connect to it!");
+		}
+	}
+
+	private void setUpButton(final Button button, final boolean implemented) {
 		button.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -73,19 +117,7 @@ public class MainActivity extends Activity {
 				if (implemented) {
 					// Checks dependencies.
 					if (isAppInstalled(RADAR_APP)) {
-						// Custom code.
-						LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-						Location location = lm
-								.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-						double longitude = location.getLongitude();
-						double latitude = location.getLatitude();
-
-						// Displays radar application.
-						Intent intent = new Intent(RADAR_APP + "."
-								+ RADAR_LAUNCH);
-						intent.putExtra("latitude", (float) (latitude + 5));
-						intent.putExtra("longitude", (float) (longitude + 5));
-						startActivity(intent);
+						askForCoords(button);
 					} else {
 						showAppRequestAlert(RADAR_APP);
 					}
@@ -110,6 +142,20 @@ public class MainActivity extends Activity {
 		}
 
 		return appInstalled;
+	}
+
+	private void showIvyAlert(String message) {
+		// Creates the alert properly.
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Network issue");
+		builder.setMessage(message);
+		builder.setIcon(android.R.drawable.ic_dialog_alert);
+		
+		// Makes the only button.
+		builder.setPositiveButton("OK", null);
+		
+		// Displays the alert.
+		builder.show();
 	}
 
 	private void showAppRequestAlert(final String appPackageName) {

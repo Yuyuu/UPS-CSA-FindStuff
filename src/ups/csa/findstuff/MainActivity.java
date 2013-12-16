@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -31,7 +32,7 @@ public class MainActivity extends Activity {
 
 		setContentView(R.layout.activity_main);
 
-		startIvy(LOCAL_NETWORK, Ivy.DEFAULT_PORT);
+		new IvyBus().execute();
 
 		setUpButton((Button) findViewById(R.id.wallet), false);
 		setUpButton((Button) findViewById(R.id.keys), true);
@@ -184,6 +185,16 @@ public class MainActivity extends Activity {
 
 		// Displays the alert.
 		builder.show();
+	}
+	
+	private class IvyBus extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			startIvy(LOCAL_NETWORK, Ivy.DEFAULT_PORT);
+			return null;
+		}
+		
 	}
 
 }

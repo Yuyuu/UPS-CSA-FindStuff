@@ -1,5 +1,10 @@
 package ups.csa.findstuff;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -20,7 +25,6 @@ public class MainActivity extends Activity {
 	private static final String RADAR_APP = "com.google.android.radar";
 	private static final String RADAR_LAUNCH = "SHOW_RADAR";
 	private static final String ANDROID_MARKET = "market://details?id=";
-	private static final String LOCAL_NETWORK = "192.168.1";
 
 	private Ivy bus;
 	private boolean ivyStarted;
@@ -32,7 +36,7 @@ public class MainActivity extends Activity {
 
 		setContentView(R.layout.activity_main);
 
-		new IvyBus().execute();
+		new IvyBus(getLocalNetwork()).execute();
 
 		setUpButton((Button) findViewById(R.id.wallet), false);
 		setUpButton((Button) findViewById(R.id.keys), true);
@@ -131,6 +135,25 @@ public class MainActivity extends Activity {
 			}
 		});
 	}
+	
+	private String getLocalNetwork() {
+		String network = null;
+		
+		try {
+		    for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+		        NetworkInterface intf = en.nextElement();
+		        for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+		            InetAddress inetAddress = enumIpAddr.nextElement();
+		            if (!inetAddress.isLoopbackAddress()) {
+		            	String ipAddress = inetAddress.getHostAddress();
+		            	network = ipAddress.substring(0, ipAddress.lastIndexOf("."));
+		            }
+		        }
+		    }
+		} catch (SocketException e) { }
+		showIvyAlert(network);
+		return network;
+	}
 
 	private boolean isAppInstalled(String appPackageName) {
 		boolean appInstalled = true;
@@ -189,9 +212,15 @@ public class MainActivity extends Activity {
 	
 	private class IvyBus extends AsyncTask<Void, Void, Void> {
 
+		private String network;
+		
+		public IvyBus(String network) {
+			this.network = network;
+		}
+		
 		@Override
 		protected Void doInBackground(Void... params) {
-			startIvy(LOCAL_NETWORK, Ivy.DEFAULT_PORT);
+			startIvy(network, Ivy.DEFAULT_PORT);
 			return null;
 		}
 		

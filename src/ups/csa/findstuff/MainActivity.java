@@ -77,35 +77,35 @@ public class MainActivity extends Activity {
 				try {
 					bus.bindMsg("^Coords (\\d+\\.\\d+) (\\d+\\.\\d+)$",
 							new IvyMessageListener() {
-	
+
 								@Override
-								public void receive(IvyClient client, String[] args) {
+								public void receive(IvyClient client,
+										String[] args) {
 									// Checks if it is the right item.
 									if (client.getApplicationName().equals(
 											itemToFind)) {
 										// Unsubscribes to the bus.
 										bus.unBindMsg("^Coords (\\d+\\.\\d+) (\\d+\\.\\d+)$");
-	
+
 										// Gets the item coordinates.
-										double latitude = Double
+									    double latitude = Double
 												.parseDouble(args[0]);
 										double longitude = Double
 												.parseDouble(args[1]);
-	
+
 										// Displays radar application.
-										Intent intent = new Intent(RADAR_APP + "."
-												+ RADAR_LAUNCH);
-										intent.putExtra("latitude",
-												(float) latitude);
-										intent.putExtra("longitude",
-												(float) longitude);
+										Intent intent = new Intent(RADAR_APP
+												+ "." + RADAR_LAUNCH);
+										intent.putExtra("latitude", (float) latitude);
+										intent.putExtra("longitude", (float) longitude);										
 										startActivity(intent);
 									}
 								}
-	
+
 							});
 					bus.sendMsg("Search " + itemToFind);
-				} catch (IvyException e) { }
+				} catch (IvyException e) {
+				}
 			} else {
 				showIvyAlert("The item is not connected to the network right now.\n\nYou must find it yourself, sorry!");
 			}
@@ -135,22 +135,24 @@ public class MainActivity extends Activity {
 			}
 		});
 	}
-	
+
 	private String getLocalNetwork() {
 		String network = null;
-		
+
 		try {
-		    for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
-		        NetworkInterface intf = en.nextElement();
-		        for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
-		            InetAddress inetAddress = enumIpAddr.nextElement();
-		            if (!inetAddress.isLoopbackAddress()) {
-		            	String ipAddress = inetAddress.getHostAddress();
-		            	network = ipAddress.substring(0, ipAddress.lastIndexOf("."));
-		            }
-		        }
-		    }
-		} catch (SocketException e) { }
+			for (Enumeration<NetworkInterface> en = NetworkInterface
+					.getNetworkInterfaces(); en.hasMoreElements();) {
+				NetworkInterface intf = en.nextElement();
+				for (Enumeration<InetAddress> enumIpAddr = intf
+						.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+					InetAddress inetAddress = enumIpAddr.nextElement();
+					if (!inetAddress.isLoopbackAddress()) {
+						String ipAddress = inetAddress.getHostAddress();
+					}
+				}
+			}
+		} catch (SocketException e) {
+		}
 		showIvyAlert(network);
 		return network;
 	}
@@ -174,10 +176,10 @@ public class MainActivity extends Activity {
 		builder.setTitle("Network issue");
 		builder.setMessage(message);
 		builder.setIcon(android.R.drawable.ic_dialog_alert);
-		
+
 		// Makes the only button.
 		builder.setPositiveButton("OK", null);
-		
+
 		// Displays the alert.
 		builder.show();
 	}
@@ -209,21 +211,21 @@ public class MainActivity extends Activity {
 		// Displays the alert.
 		builder.show();
 	}
-	
+
 	private class IvyBus extends AsyncTask<Void, Void, Void> {
 
 		private String network;
-		
+
 		public IvyBus(String network) {
 			this.network = network;
 		}
-		
+
 		@Override
 		protected Void doInBackground(Void... params) {
 			startIvy(network, Ivy.DEFAULT_PORT);
 			return null;
 		}
-		
+
 	}
 
 }

@@ -108,10 +108,10 @@ public class MainActivity extends Activity {
 				} catch (IvyException e) {
 				}
 			} else {
-				showIvyAlert("The item is not connected to the network right now.\n\nYou must find it yourself, sorry!");
+				showAlert("Network issue", "The item is not connected to the network right now.\n\nYou must find it yourself, sorry!");
 			}
 		} else {
-			showIvyAlert("You are not connected to the network right now.\n\nPlease connect to it!");
+			showAlert("Network issue", "You are not connected to the network right now.\n\nPlease connect to it!");
 		}
 	}
 
@@ -128,10 +128,7 @@ public class MainActivity extends Activity {
 						showAppRequestAlert(RADAR_APP);
 					}
 				} else {
-					Intent intent = new Intent(MainActivity.this,
-							RadarActivity.class);
-					intent.putExtra("CHOSE", "Not implemented yet.");
-					MainActivity.this.startActivity(intent);
+					showAlert("Missing object", "Your item is not referenced right now...");
 				}
 			}
 		});
@@ -179,10 +176,10 @@ public class MainActivity extends Activity {
 		return appInstalled;
 	}
 
-	private void showIvyAlert(String message) {
+	private void showAlert(String title, String message) {
 		// Creates the alert properly.
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Network issue");
+		builder.setTitle(title);
 		builder.setMessage(message);
 		builder.setIcon(android.R.drawable.ic_dialog_alert);
 

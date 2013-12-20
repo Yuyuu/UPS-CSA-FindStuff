@@ -1,6 +1,7 @@
 package ups.csa.findstuff;
 
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
@@ -143,17 +144,25 @@ public class MainActivity extends Activity {
 			for (Enumeration<NetworkInterface> en = NetworkInterface
 					.getNetworkInterfaces(); en.hasMoreElements();) {
 				NetworkInterface intf = en.nextElement();
+				
 				for (Enumeration<InetAddress> enumIpAddr = intf
 						.getInetAddresses(); enumIpAddr.hasMoreElements();) {
 					InetAddress inetAddress = enumIpAddr.nextElement();
+					
 					if (!inetAddress.isLoopbackAddress()) {
-						String ipAddress = inetAddress.getHostAddress();
+						NetworkInterface networkInterface = NetworkInterface.getByInetAddress(inetAddress);
+						
+						for (InterfaceAddress address : networkInterface.getInterfaceAddresses()) {
+							if (address.getBroadcast().isSiteLocalAddress()) {
+								network = address.getBroadcast().toString().replaceAll("/", "");;
+							}
+						}
 					}
 				}
 			}
 		} catch (SocketException e) {
 		}
-		showIvyAlert(network);
+
 		return network;
 	}
 
